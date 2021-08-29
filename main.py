@@ -35,6 +35,7 @@ class Apihandler:
             'NVDA': 'NASDAQ: Nvidia',
             'AMZN': 'NASDAQ: Amazon',
             'HOOD': 'NASDAQ: Robinhood',
+            'KO': 'NYSE: Coca-Cola',
             'NFLX': 'NASDAQ: Netflix',
             'DIS': 'NYSE: Disney',
             'BABA': 'NASDAQ: Alibaba',
