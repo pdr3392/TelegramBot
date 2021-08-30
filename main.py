@@ -136,13 +136,13 @@ class Apihandler:
 
         return table
 
-@bot.message_handler(commands=[' ', ' ', ' ', ' '])
+@bot.message_handler(commands=['start', 'help', 'stocks', 'check'])
 def process_comand(message):
     if message.text == '/start':
         bot.reply_to(message, 'Interações permitidas:\n\n'
                               '/help\n'
                               '/stocks\n'
-                              '/newsletter')
+                              '/check')
     elif message.text == '/help':
         bot.reply_to(message, 'Fui desenvolvido para auxiliar nossos leitores. Valorizamos muito nossa linha editorial '
                               'e acreditamos que você poderia encontrar atualizações e opiniões sobre o mercado financeiro '
@@ -154,6 +154,9 @@ def process_comand(message):
     elif message.text == '/stocks':
         api = Apihandler(config('FINNHUBCLIENT_API_KEY'))
         bot.reply_to(message, 'Legenda: E = empresa; V = Valor do papel; Vv = variação; % = variação em % \n' + api.parse_table(api.format_results(api.retrieve_and_validate())))
+    elif message.text == '/check':
+        placeholder = 'test'
+        bot.reply_to(message, placeholder)
     else:
         bot.reply_to(message, 'teste1')
 
