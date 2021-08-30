@@ -6,17 +6,17 @@ import time
 import datetime
 from tabulate import tabulate
 from decouple import config
+import finnhub
+import time
+import datetime
+import sys
+from tabulate import tabulate
 
 
 bot = telebot.TeleBot(config('TELEGRAM_BOT_KEY'))
 res = requests.get('http://localhost:4000/api/news')
 resnewsletter = json.loads(res.content)
 
-import finnhub
-import time
-import datetime
-import sys
-from tabulate import tabulate
 
 class Apihandler:
     def __init__(self, finnhub_client):
