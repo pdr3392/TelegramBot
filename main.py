@@ -155,10 +155,8 @@ def process_comand(message):
         api = Apihandler(config('FINNHUBCLIENT_API_KEY'))
         bot.reply_to(message, 'Legenda: E = empresa; V = Valor do papel; Vv = variação; % = variação em % \n' + api.parse_table(api.format_results(api.retrieve_and_validate())))
     elif message.text == '/check':
-        placeholder = 'test'
+        placeholder = 'oi'
         bot.reply_to(message, placeholder)
-    else:
-        bot.reply_to(message, 'teste1')
 
 
 @bot.message_handler(func=lambda message: True)
@@ -167,6 +165,9 @@ def echo_all(message):
         bot.reply_to(message,
                      '*blip* *blip* *blop* Essa interação não é permitida. Sugiro que converse com nossos adminsitradores: \n\n'
                      '@pedrocorreia3392 *blip* *blip* *blop*')
+
+
+
 
 
 bot.polling()
