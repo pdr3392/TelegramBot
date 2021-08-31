@@ -44,13 +44,15 @@ class Apihandler:
         }
 
     def get_news(self):
-      news_list = []
-      for item in self.finnhub_client.general_news('general', min_id=0):
-          date_parsed = datetime.datetime.fromtimestamp(item['datetime'])
-          if str(date_parsed).split(' ')[0] == str(datetime.date.today()):
-              news_list.append(f"{item['source']}: {item['headline']} \n {item['url']} \n {date_parsed} \n\n")
-      return news_list
-
+        news_list = []
+        for item in self.finnhub_client.general_news('general', min_id=0):
+            date_parsed = datetime.datetime.fromtimestamp(item['datetime'])
+            item_hour = str(datetime.datetime.fromtimestamp(
+                item['datetime'])).split(' ')[1][0:2]
+            if str(date_parsed).split(' ')[0] == str(datetime.date.today()) and int(item_hour) > 17:
+                news_list.append(
+                    f"{item['source']}: {item['headline']} \n {item['url']} \n {date_parsed} \n\n")
+        return news_list
 
     def get_ticker(self, ticker):
         try:
@@ -124,19 +126,20 @@ class Apihandler:
             formatted_line = []
             for line in item.split('\n'):
                 formatted_line.append(line.strip().replace('Symbol - ', '')
-                                                .replace('Current Value: ', 'US$')
-                                                .replace('Change: ', '')
-                                                .replace('Change %:', ''))
+                                      .replace('Current Value: ', 'US$')
+                                      .replace('Change: ', '')
+                                      .replace('Change %:', ''))
             formatted_results.append(formatted_line)
 
         return formatted_results
-    
+
     def parse_table(self, results):
         table = tabulate(results, headers=["E", "V", "Vv", "%"])
 
         return table
 
-@bot.message_handler(commands=['start', 'help', 'stocks', 'check'])
+
+@ bot.message_handler(commands=['start', 'help', 'stocks', 'check', 'news'])
 def process_comand(message):
     if message.text == '/start':
         bot.reply_to(message, 'Interações permitidas:\n\n'
@@ -150,24 +153,28 @@ def process_comand(message):
                               'com a gente e valoriza nosso trabalho. Esse carinho significa o mundo para nós. \n'
                               'Sendo assim, estou aqui para te enviar notícias e papéis que chamaram nossa atenção, '
                               'além de encaminhar as atualizações de nosso website de nossa página do Instagram. \n\n'
-                              'Para mais informações acesse:\nhttps://coiinews.com.br/index.php\nhttps://www.instagram.com/coiinews/')
+                     )
     elif message.text == '/stocks':
         api = Apihandler(config('FINNHUBCLIENT_API_KEY'))
-        bot.reply_to(message, 'Legenda: E = empresa; V = Valor do papel; Vv = variação; % = variação em % \n' + api.parse_table(api.format_results(api.retrieve_and_validate())))
-    elif message.text == '/check':
-        placeholder = 'oi'
-        bot.reply_to(message, placeholder)
+        bot.reply_to(message, 'Legenda: E = empresa; V = Valor do papel; Vv = variação; % = variação em % \n' +
+                     api.parse_table(api.format_results(api.retrieve_and_validate())))
+    elif message.text == '/news':
+        api = Apihandler(config('FINNHUBCLIENT_API_KEY'))
+        for item in api.get_news():
+            bot.reply_to(message, item)
+            time.sleep(0.5)
+    elif message.text.split()[0] == '/check':
+        parse_string = message.text.replace(f'{message.text.split()[0]} ', '')
+        api = Apihandler(config('FINNHUBCLIENT_API_KEY'))
+        bot.reply_to(message, api.get_ticker(parse_string))
 
 
-@bot.message_handler(func=lambda message: True)
+@ bot.message_handler(func=lambda message: True)
 def echo_all(message):
     if message.chat.type == 'private':
         bot.reply_to(message,
                      '*blip* *blip* *blop* Essa interação não é permitida. Sugiro que converse com nossos adminsitradores: \n\n'
                      '@pedrocorreia3392 *blip* *blip* *blop*')
-
-
-
 
 
 bot.polling()
