@@ -145,7 +145,8 @@ def process_comand(message):
         bot.reply_to(message, 'Interações permitidas:\n\n'
                               '/help\n'
                               '/stocks\n'
-                              '/check')
+                              '/news\n'
+                              '/check + ativo (/check AAPL)')
     elif message.text == '/help':
         bot.reply_to(message, 'Fui desenvolvido para auxiliar nossos leitores. Valorizamos muito nossa linha editorial '
                               'e acreditamos que você poderia encontrar atualizações e opiniões sobre o mercado financeiro '
