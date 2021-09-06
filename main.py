@@ -4,7 +4,6 @@ import json
 import finnhub
 import time
 import datetime
-from tabulate import tabulate
 from decouple import config
 import finnhub
 import time
@@ -49,7 +48,7 @@ class Apihandler:
             date_parsed = datetime.datetime.fromtimestamp(item['datetime'])
             item_hour = str(datetime.datetime.fromtimestamp(
                 item['datetime'])).split(' ')[1][0:2]
-            if str(date_parsed).split(' ')[0] == str(datetime.date.today()) and int(item_hour) > 17:
+            if str(date_parsed).split(' ')[0] == str(datetime.date.today()) and int(item_hour) > 7:
                 news_list.append(
                     f"{item['source']}: {item['headline']} \n {item['url']} \n {date_parsed} \n\n")
         return news_list
@@ -76,28 +75,30 @@ class Apihandler:
             print(
                 f"Empresa não cadastrada no banco de dados (razão social não foi encontrada), Symbol: {exc}\n")
 
-        print('Reddit Sentiment:')
+        sentiment_result = ['reddit result: \n']
         for item in ticker_func['reddit']:
             date_parsed = item['atTime']
             if item != '' and str(date_parsed).split(' ')[0] == str(datetime.date.today()):
-                print(f"{item['atTime']}:\nMention: {item['mention']}\n" +
-                      f"Positive Score: {item['positiveScore']}\n" +
-                      f"Positive Mention: {item['positiveMention']}\n" +
-                      f"Negative Score:{item['negativeScore']}\n" +
-                      f"Negative Mention: {item['negativeMention']}\n" +
-                      f"Score: {item['score']}\n\n")
+                sentiment_result.append(f"{item['atTime']}:\nMention: {item['mention']}\n" +
+                                        f"Positive Score: {item['positiveScore']}\n" +
+                                        f"Positive Mention: {item['positiveMention']}\n" +
+                                        f"Negative Score:{item['negativeScore']}\n" +
+                                        f"Negative Mention: {item['negativeMention']}\n" +
+                                        f"Score: {item['score']}\n\n")
+        sentiment_result.append('\n')
 
-        print('\n\nTwitter Sentiment:')
+        sentiment_result.append('Twitter Results:\n')
 
         for item in ticker_func['twitter']:
             date_parsed = item['atTime']
             if item != '' and str(date_parsed).split(' ')[0] == str(datetime.date.today()):
-                print(f"{item['atTime']}:\nMention: {item['mention']}\n" +
-                      f"Positive Score: {item['positiveScore']}\n" +
-                      f"Positive Mention: {item['positiveMention']}\n" +
-                      f"Negative Score:{item['negativeScore']}\n" +
-                      f"Negative Mention: {item['negativeMention']}\n" +
-                      f"Score: {item['score']}\n\n")
+                sentiment_result.append(f"{item['atTime']}:\nMention: {item['mention']}\n" +
+                                        f"Positive Score: {item['positiveScore']}\n" +
+                                        f"Positive Mention: {item['positiveMention']}\n" +
+                                        f"Negative Score:{item['negativeScore']}\n" +
+                                        f"Negative Mention: {item['negativeMention']}\n" +
+                                        f"Score: {item['score']}\n\n")
+        return ''.join(sentiment_result)
 
     def retrieve_data(self):
         data_temp = []
@@ -139,7 +140,7 @@ class Apihandler:
         return table
 
 
-@ bot.message_handler(commands=['start', 'help', 'stocks', 'check', 'news'])
+@ bot.message_handler(commands=['start', 'help', 'stocks', 'check', 'news', 'sentiment'])
 def process_comand(message):
     if message.text == '/start':
         bot.reply_to(message, 'Interações permitidas:\n\n'
@@ -164,6 +165,10 @@ def process_comand(message):
         for item in api.get_news():
             bot.reply_to(message, item)
             time.sleep(0.5)
+    elif message.text.split()[0] == '/sentiment':
+        parse_string = message.text.replace(f'{message.text.split()[0]} ', '')
+        api = Apihandler(config('FINNHUBCLIENT_API_KEY'))
+        bot.reply_to(message, api.get_sentiment(parse_string))
     elif message.text.split()[0] == '/check':
         parse_string = message.text.replace(f'{message.text.split()[0]} ', '')
         api = Apihandler(config('FINNHUBCLIENT_API_KEY'))
